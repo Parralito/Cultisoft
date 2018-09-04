@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <section class="content-header">
     <h1>
@@ -71,7 +69,7 @@
 
     </div>
     <div class="row hidden" new>
-        <form savePersonalizado action="_guia" role="guias" class="center-block" enctype="multipart/form-data">
+        <form id="frm" savePersonalizado action="_guia" role="guias" class="center-block">
             <div class="col-md-6">
                 <div class="box box-info">
                     <div class="box-header with-border">
@@ -186,8 +184,9 @@
                             </div>
                         </div>
                         <div class="row">     
-                         <input id="input-id" name="input-id[]" type="file" class="file" multiple 
-    data-show-upload="false" data-show-caption="true" data-msg-placeholder="Select {files} for upload...">
+                            <div class="col-md-12">
+                                <input id="input-id" name="input-id[]" type="file" class="file" multiple data-show-upload="false" data-show-caption="true" data-msg-placeholder="Select {files} for upload...">
+                            </div>
                         </div>  
 
                     </div>
@@ -207,135 +206,7 @@
 
         </form>
     </div>
-    <div class="row hidden" init activar>
-        <form action="_guia" role="ACTIVAR.GUIAS" class="flex-column" >
-            <div class="flex-row">
-                <div class="col-md-6">
-                    <div class="box box-info" FPActivar>
-                        <div class="box-header with-border">
-                            <h3 class="box-title">
-                                <i class="fa fa-star"></i>
-                                Activar Guía
-                            </h3>
-                            <span class="box-title pull-right bold" style="color:red;">
-                                TOTAL ($) <span id="totalPA" total></span>
-                            </span>
-                        </div>
-                        <div class="box-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group form-group-sm">
-                                        <label for="" class="control-label">Tarifa Admin.</label>
-                                        <input type="text" class="form-control" name="tarifaAdmin" readonly style="text-align: right;"  >
-                                    </div>
-                                    <div class="form-group form-group-sm">
-                                        <label for="" class="control-label">Reconexión</label>
-                                        <input myDecimal data-tipo="myDecimal" type="text" class="form-control" name="reconexion" value="0.00" >
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="form-group form-group-sm">
-                                        <label for="" class="control-label">Observación</label>
-                                        <textarea name="observacion" rows="2" class="form-control"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <table id="tbFormaPago">
-                                <thead>
-                                    <tr>
-                                        <th data-field="descripcion">Forma de Pago</th>
-                                        <th data-field="valor" data-formatter="imask" data-events="event_input" data-align="center" class="col-md-3">Valor</th>
-                                        <th data-field="detalle" class="col-md-2" data-formatter="defaultInput" data-events="event_input_default">N° Comprobante</th>
-                                    </tr>
-                                </thead>
-                            </table>
-
-                        </div>
-                        <div class="box-footer">
-                            <div class="pull-right">
-                                <button clean type="button" class="btn btn-danger">
-                                    <i class="fa fa-reply"></i> Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-save"></i> Activar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--            <div class="flex-row">
-                            <div class="col-md-6">
-                                <div class="pull-right">
-                                    <button clean type="button" class="btn btn-danger">
-                                        <i class="fa fa-reply"></i> Cancelar
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fa fa-save"></i> Activar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>-->
-        </form>
-    </div>
-    <div class="row hidden" init inactivar>
-        <form action="_guia" role="INACTIVAR.GUIAS" class="flex-column" >
-            <div class="flex-row">
-                <div class="col-md-6">
-                    <div class="box box-info" FPActivar>
-                        <div class="box-header with-border">
-                            <h3 class="box-title">
-                                <i class="fa fa-times-circle"></i>
-                                Inactivación de Guía
-                            </h3>
-                            <span class="box-title pull-right bold" style="color:red;">
-                                TOTAL ($) <span id="totalPA" total></span>
-                            </span>
-                        </div>
-                        <div class="box-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group form-group-sm">
-                                        <label for="" class="control-label">Costo</label>
-                                        <input myDecimal data-tipo="myDecimal" type="text" class="form-control" name="costo" value="0.00" >
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="form-group form-group-sm">
-                                        <label for="" class="control-label">Motivo de la inactivación</label>
-                                        <textarea name="observacion" rows="2" class="form-control"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <table id="tbFormaPago">
-                                <thead>
-                                    <tr>
-                                        <th data-field="descripcion">Forma de Pago</th>
-                                        <th data-field="valor" data-formatter="imask" data-events="event_input" data-align="center" class="col-md-3">Valor</th>
-                                        <th data-field="detalle" class="col-md-2" data-formatter="defaultInput" data-events="event_input_default">N° Comprobante</th>
-                                    </tr>
-                                </thead>
-                            </table>
-
-
-                        </div>
-                        <div class="box-footer">
-                            <div class="pull-right">
-                                <button clean type="button" class="btn btn-danger btn-sm">
-                                    <i class="fa fa-reply"></i> Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <i class="fa fa-times-circle"></i> Inactivar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
+    
 </section>
 
 

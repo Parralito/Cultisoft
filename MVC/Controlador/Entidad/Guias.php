@@ -20,6 +20,7 @@ class Guias extends ModelSQL {
     public $DetalleRegistro;
     public $DetalleUpdate;
     public $Detalle;
+    public $Directorio;
 
     function __construct() {
         $this->Id = 0;
@@ -28,5 +29,6 @@ class Guias extends ModelSQL {
         $this->Direccion = "";
         $this->DetalleUpdate = null;
         $this->tabla = "guias";
+        //$this->Directorio= "recurso\\cultivo";
     }
 }

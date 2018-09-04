@@ -3,7 +3,31 @@ selections = [];
 fPago = cboFPago();
 PA = null;
 rowActual = null;
-idContribuyente=null;
+idContribuyente = null;
+
+options = {
+    uploadUrl: getURL('_guia'),
+    //theme: 'explorer-fa',
+    initialPreviewAsData: true,
+    overwriteInitial: false,
+    uploadAsync: false,
+    language: 'es',
+    initialPreview: [],
+    initialPreviewConfig: [],
+    uploadExtraData: function (previewId, index) {
+        var info = {
+            accion: "save",
+            op: "guias",
+            directorio: null,
+            datos: getInformacion()
+        };
+        return info;
+    },
+    allowedFileExtensions: ['png', 'jpg']
+};
+
+
+
 function showR() {
     $("div[table]").fadeOut();
     $("div[table]").addClass("hidden");
@@ -19,6 +43,8 @@ function hideR() {
 
     $("div[table]").fadeIn("slow");
     $("div[table]").removeClass("hidden");
+    $('#input-id').fileinput('destroy');
+
 
     $("form[savePersonalizado]").clear();
 }
@@ -34,11 +60,12 @@ $(function () {
     $("#tbDetalleGuia").bootstrapTable(TablePaginationDefault);
     $("#tbFormaPago").bootstrapTable();
     $("div[detalle] input[alcantarillado]").setPorcent(0);
-    $("div[detalle] input[mensualidad]").setFloat(0);    
+    $("div[detalle] input[mensualidad]").setFloat(0);
     $("div[Estudiante] input[name='nombres']").val($("input[nombres]").val());
-    
-    
+
+
     $("#newGuia").click(function (e) {
+        $("#input-id").fileinput(options);
         if ($('input[name="cedula"]').val() !== "") {
             // Fecha 
             $("input[name='fecha']")
@@ -99,13 +126,12 @@ $(function () {
 
     $("form[savePersonalizado]").submit(function (e) {
         e.preventDefault();
-        datos = getInformacion(this);
-//        return;
-        if (!$.isEmptyObject(datos)) {
-            response = saveGlobal(datos);
-            $("#tbDetalleGuia").bootstrapTable("refresh");
-            hideR();
-        }
+        $('#input-id')
+                .fileinput('upload')
+                .fileinput('clear');
+        ;
+        $("#tbDetalleGuia").bootstrapTable("refresh");
+        hideR();
     });
 
     $("div[inactivar] form").submit(function (e) {
@@ -229,24 +255,19 @@ function iniciar() {
 
 }
 
-function getInformacion(form) {
-    datos = JSON.parse($(form).serializeObject_KBSG());
-    datos.idContribuyente = idContribuyente;
+function getInformacion() {
+    form = "#frm";
+    $('input[idcontribuyente]').val($("input[iduser]").val());
+    
+    datos = $(form).serializeObject_KBSG(true);
+    //console.log($("input[iduser]").val());
+    //datos.idContribuyente = 2;
     datos.detalle = {
         ME: $(form).find("div[detalle] input[mensualidad]").getFloat(),
-        //AL: $(form).find("div[detalle] input[alcantarillado]").getFloat(),
         DESC: $(form).find("div[detalle] input[descuento]").getFloat()
     };
-
-    dt = {
-        url: getURL($(form).attr("action")),
-        dt: {
-            accion: "save",
-            op: $(form).attr("role"),
-            datos: JSON.stringify(datos)
-        }
-    };
-    return dt;
+    //console.log(datos);
+    return datos;
 }
 
 function btnEditarGuia(value) {
@@ -255,10 +276,10 @@ function btnEditarGuia(value) {
 
 window.evtSelect = {
     "click button[select]": function (e, value, row, index) {
-        $("#modal-contribuyente").modal("hide");        
-        
-        
-        
+        $("#modal-contribuyente").modal("hide");
+
+
+
         hideR();
         /* Cargar Guias */
         $("#tbDetalleGuia").bootstrapTable("refresh");
@@ -325,7 +346,23 @@ window.evtSelect = {
     },
     "click li[edit]": function (e, value, row, index) {
         e.preventDefault();
-//        console.log(row);
+
+        rowActual = row;
+
+        dt = getJson({
+            url: getURL('_guia'),
+            data: {
+                op: "IMAGENES",
+                accion: "get",
+                guia: row.id
+            }
+        });
+        options.initialPreview = dt.map((data) => {
+            return data.ruta;
+        });
+
+        $("#input-id").fileinput(options);
+
         $("input[name='fecha']").datepicker("destroy");
         $("input[name='fecha']").attr("data-tipo", "fechaView");
 
@@ -401,7 +438,7 @@ function BtnAccion(value, rowData, index) {
             ' <i class="fa fa-fw fa-align-justify"></i>' +
             '</button>' +
             '<ul class="dropdown-menu dropdown-menu-left" >' +
-            '<li edit><a href="#"> <i class="fa fa-edit"></i> Editar</a></li>'+
+            '<li edit><a href="#"> <i class="fa fa-edit"></i> Editar</a></li>' +
             '</ul>' +
             '</div>';
 }

@@ -322,34 +322,17 @@ class GuiasDaoImp extends ModelProcedure {
 
     public static function _getRepoGuiasHabCoactiva() {
         $conn = (new C_MySQL())->open();
-        $sql = "select 
-                         UPPER(u.nombres) estudiante,
-			 UPPER(ci.descripcion) ciudad,
-			 UPPER(pa.descripcion) parroquia, 
-			 UPPER(g.direccion) direccion,
-			 UPPER(g.ccpredio) propietario, 
-			 UPPER(c.descripcion) textura, 
-			 UPPER(s.descripcion) maleza,
-			 UPPER(r.descripcion) profundidad
-                from 
-                        guias g 
-                        inner join  usuario u 
-                        on g.idcontribuyente=u.id
-                        inner join categoria c
-                        on c.id=g.idcategoria
-                        inner join parroquia pa
-                        on pa.id=g.idparroquia
-                        inner join ciudad ci
-                        on ci.id=pa.idciudad
-                        inner join sector s
-                        on s.id=g.idsector
-                        inner join ruta r
-                        on r.id=s.idruta
-
-        ;";
+        $sql = "SELECT * from viewrepoguiashabcoactiva limit 1000;";
         $dts = C_MySQL::returnListAsoc($conn, $sql);
         $conn->close();
         return $dts;
+    }
+    public static function updateDirectorio($id, $directorio) {
+        $conn = (new C_MySQL())->open();
+        $sql = "Update guias set directorio = '$directorio' where id = $id;";
+        $bandera = $conn->query($sql);
+        $conn->close();
+        return $bandera;
     }
 
     public static function updateFechaUltimoPago($datos) {

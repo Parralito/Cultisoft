@@ -1,9 +1,10 @@
-    <?php
+<?php
 
 require_once __DIR__ . "/../init.php";
 
 include_once SITE_ROOT . '/MVC/Modelo/CategoriaDaoImp.php';
 include_once SITE_ROOT . '/MVC/Modelo/GuiasDaoImp.php';
+include_once SITE_ROOT . '/MVC/Modelo/ImagenesDaoImp.php';
 //include_once SITE_ROOT . '/MVC/Modelo/CobroMensualDaoImp.php';
 include_once SITE_ROOT . '/MVC/Controlador/JsonMapper.php';
 
@@ -28,34 +29,34 @@ switch ($accion) {
                 break;
             case "DETALLEGUIASXCONTRIBUYENTE":
                 $params["contribuyente"] = $_POST["idContribuyente"];
-                if(isset($_POST["estado"])){
+                if (isset($_POST["estado"])) {
                     $params["estado"] = $_POST["estado"];
                 }
-                if(is_null($params["buscar"]))
+                if (is_null($params["buscar"]))
                     unset($params["buscar"]);
                 $resultado = json_encode(GuiasDaoImp::_listDetalleGuiasxContribuyente_2($params));
                 break;
-                
-              case "GUIASXCONTRIBUYENTE":
+
+            case "GUIASXCONTRIBUYENTE":
                 $idContribuyente = $_POST["idContribuyente"];
                 $resultado = json_encode(GuiasDaoImp::_listGuiasxContribuyente($idContribuyente));
                 break;
-            
-             case "DETALLEGUIASXCONTRIBUYENTEG":
+
+            case "DETALLEGUIASXCONTRIBUYENTEG":
                 $params["contribuyente"] = $_POST["idContribuyente"];
-                if(isset($_POST["estado"])){
+                if (isset($_POST["estado"])) {
                     $params["estado"] = $_POST["estado"];
                 }
-                if(is_null($params["buscar"]))
+                if (is_null($params["buscar"]))
                     unset($params["buscar"]);
                 $resultado = json_encode(GuiasDaoImp::_listDetalleGuiasxContribuyente_G($params));
                 break;
             case "DETALLEGUIASXCONTRIBUYENTEJC":
                 $params["contribuyente"] = $_POST["idContribuyente"];
-                if(isset($_POST["estado"])){
+                if (isset($_POST["estado"])) {
                     $params["estado"] = $_POST["estado"];
                 }
-                if(is_null($params["buscar"]))
+                if (is_null($params["buscar"]))
                     unset($params["buscar"]);
                 $resultado = json_encode(GuiasDaoImp::_listDetalleGuiasxContribuyente_JC($params));
                 break;
@@ -79,21 +80,22 @@ switch ($accion) {
                 $resultado = json_encode(GuiasDaoImp::_listDetalleGuiasCoactiva($idGuia));
                 break;
             case "AUDITGUIA":
-                $params["guia"]= $_POST["guia"];
+                $params["guia"] = $_POST["guia"];
                 $resultado = json_encode(GuiasDaoImp::_listAuditGuia($params));
                 break;
-             case "DETALLEGUIASXCONTRIBUYENTETODAS":
+            case "DETALLEGUIASXCONTRIBUYENTETODAS":
                 $params["contribuyente"] = $_POST["idContribuyente"];
                 $resultado = json_encode(GuiasDaoImp::_listDetalleGuiasxContribuyenteTodas($params));
                 break;
-            
         }
         break;
     case "save":
         if (array_key_exists("datos", $_POST)) {
             $json = json_decode($_POST["datos"]);
         }
-        session_start();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         $user = $_SESSION["login"]["user"];
         switch ($op) {
             case "CATEGORIA":
@@ -114,23 +116,12 @@ switch ($accion) {
                     "status" => GuiasDaoImp::_ActGuia($dt)
                 ));
                 break;
-            case "CHANGE.CONTRIBUYENTE":
 
-                $dt = json_decode($_POST["datos"], TRUE);
-                $dt["DetRegistro"] = array(
-                    "id" => $user["id"],
-                    "usuario" => $user["username"]
-                );
-
-                $resultado = json_encode(array(
-                    "status" => GuiasDaoImp::_ChangeGuia($dt)
-                ));
-                break;
             case "GUIAS":
-                $Guias = $mapper->map($json, new Guias());    
-                $imagen = $_FILES["imagenes"];
-                $imagen = $_POST["imagenes"];
-                array_push($Guias->exception, "FPAGOS");                
+
+                $Guias = $mapper->map($json, new Guias());
+                array_push($Guias->exception, "FPAGOS");
+                $isNew = $Guias->Id === 0;
                 if ($Guias->Id === 0) {
                     $Guias->DetalleRegistro = array(
                         "id" => $user["id"],
@@ -142,25 +133,38 @@ switch ($accion) {
                         "usuario" => $user["username"]
                     );
                 }
-                $resultado = json_encode(GuiasDaoImp::save($Guias));
-                break;
-            case "UPDATEFECHAULTIMOPAGO":
-                $json = json_decode($_POST["datos"], TRUE);
-                $json["detalleregistro"] = array(
-                    "id" => $user["id"],
-                    "usuario" => $user["username"]
-                );
-                $datos = json_encode($json);
-                $resultado = GuiasDaoImp::updateFechaUltimoPago($datos);
-                break;
-            case "UPDATEFECHAULTIMOPAGOUP":
-                $json = json_decode($_POST["datos"], TRUE);
-                $json["detalleregistro"] = array(
-                    "id" => $user["id"],
-                    "usuario" => $user["username"]
-                );
-                $datos = json_encode($json);
-                $resultado = GuiasDaoImp::updateFechaUltimoPagoUP($datos);
+                $resultado = GuiasDaoImp::save($Guias);
+                if ($resultado["status"]) {
+                    $Guias->Directorio = (is_null($Guias->Directorio))? $_POST["directorio"] : $Guias->Directorio;
+                    $_global = SITE_ROOT . '\\recurso\\cultivo';
+                    // Crear Directorio 
+                    if ($isNew) {
+                        $directorio = $_global . '\\' . $user["id"] . '\\';
+                        if (!file_exists($directorio)) {
+                            mkdir($directorio);
+                        }
+                        $directorio = $_global . '\\' . $user["id"] . '\\' . $Guias->Id . '\\';
+                        if (!file_exists($directorio)) {
+                            mkdir($directorio);
+                        }
+                        $Guias->Directorio = 'recurso/cultivo/' . $user["id"] . '/' . $Guias->Id . '/';
+                        GuiasDaoImp::updateDirectorio($Guias->Id, $Guias->Directorio);
+                    }
+                    // Imagenes
+                    //$img = $_FILES["input-id"];
+                    if (count($_FILES) > 0){
+                        $img = $_FILES["input-id"];
+                        for ($index = 0; $index < count($img["tmp_name"]); $index++) {
+                            $destino = SITE_ROOT . '\\' . $Guias->Directorio . "\\" . $img["name"][$index];
+                            move_uploaded_file($img["tmp_name"][$index], $destino);
+                            $imagen = new Imagenes();
+                            $imagen->Ruta = $img["name"][$index];
+                            $imagen->IDGuias = $Guias->Id;
+                            ImagenesDaoImp::save($imagen);
+                        }
+                    }
+                }
+
                 break;
         }
         break;
@@ -229,7 +233,11 @@ switch ($accion) {
                 $id = $_POST["id"];
                 $resultado = json_encode(GuiasDaoImp::_detalleGuiaCoactivaAbono($id));
                 break;
+            case "IMAGENES":
+                $id = $_POST["guia"];
+                $resultado = ImagenesDaoImp::_get($id);
+                break;
         }
         break;
 }
-echo $resultado;
+echo is_array($resultado) ? json_encode($resultado) : $resultado;

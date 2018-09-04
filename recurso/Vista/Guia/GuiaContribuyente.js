@@ -4,6 +4,27 @@ fPago = cboFPago();
 PA = null;
 rowActual = null;
 
+options = {
+    uploadUrl: getURL('_guia'),
+    //theme: 'explorer-fa',
+    initialPreviewAsData: true,
+    overwriteInitial: false,
+    uploadAsync: false,
+    language: 'es',
+    initialPreview: [],
+    initialPreviewConfig: [],
+    uploadExtraData: function (previewId, index) {
+        var info = {
+            accion: "save",
+            op: "guias",
+            directorio: (rowActual !== undefined) ? rowActual.directorio : null,
+            datos: getInformacion()
+        };
+        return info;
+    },
+    allowedFileExtensions: ['png', 'jpg']
+};
+
 function showR() {
     $("div[table]").fadeOut();
     $("div[table]").addClass("hidden");
@@ -20,6 +41,8 @@ function hideR() {
     $("div[table]").fadeIn("slow");
     $("div[table]").removeClass("hidden");
 
+    $('#input-id').fileinput('destroy');
+
     $("form[savePersonalizado]").clear();
 }
 
@@ -31,7 +54,9 @@ function fn_query(params) {
 }
 
 $(function () {
-    $("#input-id").fileinput();
+    //$("#input-id").fileinput();
+
+
     $("#tbDetalleGuia").bootstrapTable(TablePaginationDefault);
     $("#tbFormaPago").bootstrapTable();
     $("div[detalle] input[alcantarillado]").setPorcent(0);
@@ -98,121 +123,29 @@ $(function () {
 
     $("form[savePersonalizado]").submit(function (e) {
         e.preventDefault();
-        datos = getInformacion(this);        
-        //return;
-        if (!$.isEmptyObject(datos)) {            
-            response = saveGlobal(datos);
-            
-            $("#tbDetalleGuia").bootstrapTable("refresh");
-            hideR();
-        }
+        $('#input-id')
+                .fileinput('upload')
+                .fileinput('clear');
+        ;
+        $("#tbDetalleGuia").bootstrapTable("refresh");
+        hideR();
     });
 
-    $("div[inactivar] form").submit(function (e) {
-        e.preventDefault();
-        datos = JSON.parse($(this).serializeObject_KBSG());
-        datos.id = rowActual.id;
-
-        if (datos.costo <= 0) {
-            MsgError({
-                title: "ERROR",
-                content: ["Valor de Costo invalido."]
-            });
-            return;
-        }
-
-
-        input = $("div[inactivar] span[total]");
-        totalDeuda = convertFloat($(input).html());
-
-        dtTableFP = $("div[inactivar] table").bootstrapTable("getData").filter(row => row.valor > 0);
-        sum = dtTableFP.reduce((a, b) => a + b.valor, 0);
-        if (sum === totalDeuda) {
-            $.post(
-                    getURL($(this).attr("action")),
-                    {
-                        dt: JSON.stringify(datos),
-                        accion: "delete",
-                        op: $(this).attr("role"),
-                        fpagos: JSON.stringify(dtTableFP)
-                    }, function (response) {
-                if (response.status) {
-                    MsgSuccess({
-                        title: "EXITO AL INACTIVAR GUIA",
-                        content: ""
-                    });
-                    //$("#tbDetalleGuia").bootstrapTable("refresh");
-                    reloadGuiaxContribuyente();
-                    hideR();
-                }
-            }, "json");
-
-        } else {
-            MsgError({
-                title: "Error <small>Pago Incorrecto</small>",
-                content: ["Total: <strong>" + formatInputMask(totalDeuda) + "</strong>", "Valor a pagar: <strong>" + formatInputMask(sum) + "</strong>"]
-            });
-        }
-    });
-
-    $("div[activar] form").submit(function (e) {
-        e.preventDefault();
-        datos = JSON.parse($(this).serializeObject_KBSG());
-        datos.id = rowActual.id;
-
-        if (datos.reconexion <= 0) {
-            MsgError({
-                title: "ERROR",
-                content: ["Valor de Reconexión invalido."]
-            });
-            return;
-        }
-
-        input = $("div[activar] span[total]");
-        totalDeuda = convertFloat($(input).html());
-
-        dtTableFP = $("div[activar] table").bootstrapTable("getData").filter(row => row.valor > 0);
-        sum = dtTableFP.reduce((a, b) => a + b.valor, 0);
-        if (sum === totalDeuda) {
-            $.post(
-                    getURL($(this).attr("action")),
-                    {
-                        dt: JSON.stringify(datos),
-                        accion: "save",
-                        op: $(this).attr("role"),
-                        fpagos: JSON.stringify(dtTableFP)
-                    }, function (response) {
-                if (response.status) {
-                    MsgSuccess({
-                        title: "EXITO AL ACTIVAR GUIA",
-                        content: ""
-                    });
-                    //$("#tbDetalleGuia").bootstrapTable("refresh");
-                    reloadGuiaxContribuyente();
-                    hideR();
-                }
-            }, "json");
-
-        } else {
-            MsgError({
-                title: "Error <small>Pago Incorrecto</small>",
-                content: ["Total: <strong>" + formatInputMask(totalDeuda) + "</strong>", "Valor a pagar: <strong>" + formatInputMask(sum) + "</strong>"]
-            });
-        }
-    });
-
-    $("div[inactivar] input[name='costo']").change(function () {
-        valor = $(this).getFloat();
-        $("div[inactivar] span[total]").html(formatInputMask(valor));
-        limpiarTbFormaPago("div[inactivar] table");
-    });
-
-    $("div[activar] input[name='reconexion']").change(function () {
-        valor = PA.valor + $(this).getFloat();
-        $("div[activar] span[total]").html(formatInputMask(valor));
-        limpiarTbFormaPago("div[activar] table");
-    });
-
+//    $("#input-id").fileinput({
+//        uploadUrl: getURL('_guia'),
+//        initialPreviewAsData: true,
+//        overwriteInitial: false,
+//        uploadAsync: false,
+//        language: 'es',uploadExtraData: function (previewId, index) {
+//            var info = {
+//                accion: "save",
+//                op: "guias",
+//                datos: getInformacion()
+//            };
+//            return info;
+//        },
+//        allowedFileExtensions: ['png', 'jpg']
+//    });
 });
 
 
@@ -229,40 +162,24 @@ function iniciar() {
     loadCbo(cboSectorRuta(id), $('select[name="idsector"]'));
 
 }
-var imagenes= "";
+var imagenes = "";
 
 function getBase64(file) {
-   
-   var reader = new FileReader();   
-   reader.readAsDataURL(file);
-   reader.onload = function () {
-     imagenes=imagenes+(String(reader.result))+" ";     
-   };      
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+        imagenes = imagenes + (String(reader.result)) + " ";
+    };
 }
-function getInformacion(form) {
-    datos = JSON.parse($(form).serializeObject_KBSG());
-    for(var i=0;i<$('#input-id').prop('files').length;i++)
-    {
-        getBase64($('#input-id').prop('files')[i]);        
-    }
+function getInformacion() {
+    form = "#frm";
+    datos = $(form).serializeObject_KBSG(true);
     datos.idContribuyente = $("div[Contribuyente] input[name='id']").val();
     datos.detalle = {
         ME: $(form).find("div[detalle] input[mensualidad]").getFloat(),
-        //AL: $(form).find("div[detalle] input[alcantarillado]").getFloat(),
         DESC: $(form).find("div[detalle] input[descuento]").getFloat()
     };
-    console.log(imagenes);
-    dt = {
-        url: getURL($(form).attr("action")),
-        dt: {
-            accion: "save",
-            op: $(form).attr("role"),
-            datos: JSON.stringify(datos),
-            imagenes: imagenes
-        }
-    };    
-    
-    return dt;
+    return datos;
 }
 
 function btnEditarGuia(value) {
@@ -341,7 +258,23 @@ window.evtSelect = {
     },
     "click li[edit]": function (e, value, row, index) {
         e.preventDefault();
-//        console.log(row);
+
+        rowActual = row;
+
+        dt = getJson({
+            url: getURL('_guia'),
+            data: {
+                op: "IMAGENES",
+                accion: "get",
+                guia: row.id
+            }
+        });
+        options.initialPreview = dt.map((data) => {
+            return data.ruta;
+        });
+
+        $("#input-id").fileinput(options);
+
         $("input[name='fecha']").datepicker("destroy");
         $("input[name='fecha']").attr("data-tipo", "fechaView");
 
@@ -417,7 +350,7 @@ function BtnAccion(value, rowData, index) {
             ' <i class="fa fa-fw fa-align-justify"></i>' +
             '</button>' +
             '<ul class="dropdown-menu dropdown-menu-left" >' +
-            '<li edit><a href="#"> <i class="fa fa-edit"></i> Ver</a></li>'+
+            '<li edit><a href="#"> <i class="fa fa-edit"></i> Ver</a></li>' +
             '</ul>' +
             '</div>';
 }

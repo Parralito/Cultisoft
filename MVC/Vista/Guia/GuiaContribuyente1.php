@@ -5,6 +5,7 @@
     </h1>
     <hr class="style8">
 </section>
+
 <section class="content container-fluid">
     <div Registro>
         <div class="row">
@@ -66,7 +67,8 @@
 
     </div>
     <div class="row hidden" new>
-        <form savePersonalizado action="_guia" role="guias" class="center-block">
+        <form id="frm" savePersonalizado action="_guia" role="guias" class="center-block">
+            <input idcontribuyente name="idContribuyente" type="text" class="hidden" value="">
             <div class="col-md-6">
                 <div class="box box-info">
                     <div class="box-header with-border">
@@ -112,7 +114,7 @@
                                     <input type="text" descuento data-tipo="myPorcentaje" class="form-control" required>
                                 </div>
                             </div>
-                                                   </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,6 +182,11 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">     
+                            <div class="col-md-12">
+                                <input id="input-id" name="input-id[]" type="file" class="file" multiple data-show-upload="false" data-show-caption="true" data-msg-placeholder="Select {files} for upload...">
+                            </div>
+                        </div> 
 
                     </div>
                 </div>
