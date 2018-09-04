@@ -1,0 +1,28 @@
+.thCabezera {
+    width: 120px; 
+    text-align: center;
+    font-weight: bold;
+}
+.thDatos{
+    padding-left: 10px;
+}
+
+div[name="header"] {
+    margin: 0 auto ;
+    display: flex; 
+    flex-direction: row; 
+}
+div[name="encabezado"]{
+    margin: 5px 0;
+}
+
+#proforma{
+    padding: 2px;
+}
+
+.bold{
+    font-weight: bold;
+}
+.bx{
+    outline: solid 2px blue;
+}
